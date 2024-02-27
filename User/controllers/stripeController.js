@@ -197,6 +197,7 @@ const createSession = async (req, res) => {
         console.log(process.env.domain);
         const { _id, email, name, stripeCustomerId } = req.user;
         const addressDetails = await Address.findOne({_id:addressId, userId: _id });
+        console.log(addressDetails.addressId);
         const { city, country, postalCode, state, firstLine } = addressDetails;
         const stripeOrders = await StripeOrders.findOne({ userId: _id });
         await StripeOrders.updateOne({_id:stripeOrders._id},{

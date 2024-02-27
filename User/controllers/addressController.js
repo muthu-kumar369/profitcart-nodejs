@@ -10,7 +10,7 @@ const listAddress=async(req,res)=>{
 
         await Address.find({userId:_id,status:1}).skip(skip).limit(size).sort({createdAt:-1}).then((address)=>{
             if(address.length==0){
-                Response(res,400,config.success_message,"No data found",null)
+                Response(res,200,config.success_message,"No data found",{address:[]})
             }else{
                 let data={
                     page,

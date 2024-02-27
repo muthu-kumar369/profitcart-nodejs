@@ -11,16 +11,24 @@ const getWishlist = async (req, res) => {
 
         const wishListData=await Wishlist.find({ userId: _id,status:1 }).populate("products").skip(skip).limit(size).sort({ createdAt: -1 })
         let productIds=[]
-        await wishListData.map((items)=>{
-            items?.productIds.map((item)=>{
-                productIds.push(item)
+        if(wishListData){
+            await wishListData.map((items)=>{
+                items?.productIds.map((item)=>{
+                    productIds.push(item)
+                })
             })
-        })
-
-        Response(res, 200, config.success_message, null, {
-            data:wishListData,
-            productIds
-        })
+    
+            Response(res, 200, config.success_message, null, {
+                data:wishListData,
+                productIds
+            })
+        }else{
+            Response(res, 200, config.success_message, null, {
+                data:[],
+                productIds:[]
+            })
+        }
+        
 
     } catch (error) {
         Response(res, 400, config.error_message, error?.message ?? error, null)
@@ -78,9 +86,10 @@ const removeFolder=async(req,res)=>{
         const {id } = req.body;
         const { _id } = req.user;
         let folderStatus = false;
-
+        let productId=[];
 
         await Wishlist.findOne({ _id: id }).then((data) => {
+            productId=data.products;
             if (data) {
                 folderStatus = true
             }
@@ -89,6 +98,9 @@ const removeFolder=async(req,res)=>{
             await Wishlist.updateOne({ _id: id, userId: _id }, {
                 $set: {
                     status:0
+                },
+                $pull:{
+                    productIds:productId
                 }
             }).then(() => {
                 Response(res, 200, config.success_message, "Folder removed succuessfully", null)

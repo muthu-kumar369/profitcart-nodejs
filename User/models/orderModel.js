@@ -28,6 +28,10 @@ const orderSchema=new mongoose.Schema({
                 required:true,
                 default: new Date()
             },
+            deliveryDate:{
+                type:Date,
+                required:false
+            },
             deliveredDate:{
                 type:Date,
                 required:false
@@ -56,6 +60,11 @@ const orderSchema=new mongoose.Schema({
                 type:mongoose.Schema.Types.ObjectId,
                 required:true,
                 ref:"address"
+            },
+            returnProduct:{
+                type:Boolean,
+                required:false,
+                default:false
             }
         }
     ],
