@@ -1,50 +1,62 @@
-const mongoose=require("mongoose");
-const Schema= require("mongoose").Schema;
+const mongoose = require("mongoose");
+const Schema = require("mongoose").Schema;
 
-const userSchema= new Schema({
-    name:{
-        type:String,
-        required:true
+const userSchema = new Schema({
+    name: {
+        type: String,
+        required: true
     },
-    email:{
-        type:String,
-        required:true,
-        unique:true
+    email: {
+        type: String,
+        required: true,
+        unique: true
     },
-    password:{
-        type:String,
-        required:true
+    password: {
+        type: String,
+        required: true
     },
-    userRole:{
-        type:String,
-        enum:["user","seller","admin"],
-        default:"user"
+    userRole: {
+        type: String,
+        enum: ["user", "seller", "admin"],
+        default: "user"
     },
-    token:{
-        type:String,
-        required:false
+    token: {
+        type: String,
+        required: false
     },
-    lastLogin:{
-        type:Date,
-        required:false
+    lastLogin: {
+        type: Date,
+        required: false
     },
-    currentOrder:{
-        type:Number,
-        required:true,
-        default:0
+    currentOrder: {
+        type: Number,
+        required: true,
+        default: 0
     },
-    returnedCount:{
-        type:Number,
-        required:true,
-        default:0
+    returnedCount: {
+        type: Number,
+        required: true,
+        default: 0
     },
-    stripeCustomerId:{
-        type:String,
-        required:false
+    stripeCustomerId: {
+        type: String,
+        required: false
+    },
+    shopName: {
+        type: String,
+        required: false
+    },
+    shopMobileNumber: {
+        type: String,
+        required: false
+    },
+    shopAddress: {
+        type: String,
+        requried: false
     }
 
-},{timestamps:true});
+}, { timestamps: true });
 
-const User = new mongoose.model("user",userSchema);
+const User = new mongoose.model("user", userSchema);
 
-module.exports=User;
+module.exports = User;

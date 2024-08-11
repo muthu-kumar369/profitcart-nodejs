@@ -10,8 +10,6 @@ const listCart = async (req, res) => {
         const skip = (page - 1) * size;
         const { _id } = req.user;
 
-
-
         const cartDetails = await Cart.find({ userId: _id, 'items.later': false }).populate('userId').populate('items.product').skip(skip).limit(size).sort({ "items.createdAt": -1 });
 
         const buylaterDetails = await Cart.find({ userId: _id, 'items.later': true }).populate('userId').populate('items.product').skip(skip).limit(size).sort({ createdAt: -1 });
@@ -158,7 +156,7 @@ const addProduct = async (req, res) => {
     }
 }
 
-const removeProdct = async (req, res) => {
+const removeProduct = async (req, res) => {
     try {
         const { id, productId } = req.body;
         var { amount, actual_amount } = req.body;
@@ -193,18 +191,18 @@ const removeProdct = async (req, res) => {
 
 const removeOrderedProducts = async (req, res) => {
     try {
-        const { products, type,stripeOrderId } = req.body;
+        const { products, type, stripeOrderId } = req.body;
         const { _id } = req.user;
 
         var productData = [];
-        const stripeOrderedData=await StripeOrders.findOne({_id:stripeOrderId,userId:_id});
+        const stripeOrderedData = await StripeOrders.findOne({ _id: stripeOrderId, userId: _id });
         console.log(stripeOrderedData);
         switch (type) {
             case "card":
-                productData=stripeOrderedData?.cartProducts;
+                productData = stripeOrderedData?.cartProducts;
                 break;
             case "cashondelivery":
-                productData=products
+                productData = products
                 break;
         }
         console.log(productData);
@@ -341,7 +339,7 @@ module.exports = {
     listCart,
     // listOfBuyLater,
     addProduct,
-    removeProdct,
+    removeProduct,
     updateLater,
     quantityUpdate,
     removeOrderedProducts

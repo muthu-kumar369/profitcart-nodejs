@@ -194,10 +194,10 @@ const retrievePriceDetails = async (req, res) => {
 const createSession = async (req, res) => {
     try {
         const { pricingDetails,addressId,cartProducts } = req.body;
-        console.log(process.env.domain);
         const { _id, email, name, stripeCustomerId } = req.user;
+        
+        req.body?.addressId ?   null :Response(res, 400, config.error_message,"Please add or select address", null);
         const addressDetails = await Address.findOne({_id:addressId, userId: _id });
-        console.log(addressDetails.addressId);
         const { city, country, postalCode, state, firstLine } = addressDetails;
         const stripeOrders = await StripeOrders.findOne({ userId: _id });
         await StripeOrders.updateOne({_id:stripeOrders._id},{
@@ -247,7 +247,7 @@ const createSession = async (req, res) => {
 
 
     } catch (error) {
-        Response(res, 200, config.error_message, error?.message ?? error, null)
+        Response(res, 400, config.error_message, error?.message ?? error, null)
     }
 }
 module.exports = {

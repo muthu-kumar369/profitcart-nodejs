@@ -4,6 +4,7 @@ const config = require("../../config.js");
 const Products = require("../models/productModel.js");
 const mongoose = require("mongoose");
 const StripeOrders = require("../models/stripeOrdersModel.js");
+const User = require("../models/userModel.js");
 
 const listOrder = async (req, res) => {
     try {
@@ -12,10 +13,10 @@ const listOrder = async (req, res) => {
         const { _id } = req.user;
         await Order.find({ userId: _id }).populate('userId').populate('items.product').populate('items.shippingAddress').skip(skip).limit(size).sort({ createdAt: -1 }).then((order) => {
             if (order.length == 0) {
-                Response(res, 200, config.success_message, "No data found", {order:[]})
+                Response(res, 200, config.success_message, "No data found", { order: [] })
             } else {
                 let count = 0;
-                let returnCount=0;
+                let returnCount = 0;
                 order.map((items) => {
                     items.items.map((item) => {
                         if (!item.cancelOrder) {
@@ -23,7 +24,7 @@ const listOrder = async (req, res) => {
                                 count++;
                             }
                         }
-                        if(item?.returnProduct){
+                        if (item?.returnProduct) {
                             returnCount++;
                         }
                     })
@@ -33,7 +34,7 @@ const listOrder = async (req, res) => {
                     size,
                     totalCount: order.length,
                     totalOrderedProduct: count,
-                    totalReturnProduct:returnCount,
+                    totalReturnProduct: returnCount,
                     order
                 }
                 Response(res, 200, config.success_message, null, data);
@@ -63,18 +64,21 @@ const createOrder = async (req, res) => {
                 }
             })
         )
-        console.log(productData);
         if (product.length != 0) {
             await Order.create({
                 userId: _id,
                 items: productData,
                 paymentMethod
-            }).then(() => {
+            }).then(async () => {
+                await User.updateOne({ _id: _id }, {
+                    $inc: {
+                        currentOrder: productData.length
+                    }
+                })
                 Response(res, 200, config.success_message, "Items ordered succuessfully!", null)
             })
         }
     } catch (error) {
-        console.log(error);
         Response(res, 400, config.error_message, error?.message ?? error, null)
     }
 }
@@ -85,7 +89,6 @@ const cancelOrder = async (req, res) => {
         const { _id } = req.user;
         const orderDetails = await Order.findOne({ _id: orderId, "items.product": productId });
         let status = "";
-        console.log(orderDetails);
         await Promise.all(
             orderDetails.items.map((item) => {
                 if (item.product.toString() == productId) {
@@ -101,15 +104,19 @@ const cancelOrder = async (req, res) => {
                     "items.$.cancelStatus": "applied",
                     "items.$.returnStatus": "initiated"
                 }
-            }).then(() => {
-                Response(res, 400, config.success_message, "Cancel orderd intiated, we will let you know progress", null)
+            }).then(async () => {
+                await User.updateOne({ _id: _id }, {
+                    $inc: {
+                        currentOrder: -1
+                    }
+                })
+                Response(res, 200, config.success_message, "Cancel orderd intiated, we will let you know progress", null)
             })
         } else {
             Response(res, 400, config.error_message, "Order doesn't delivered yet", null)
         }
 
     } catch (error) {
-        console.log(error);
         Response(res, 400, config.error_message, error?.message ?? error, null)
     }
 }
@@ -171,7 +178,12 @@ const createBulkOrder = async (req, res) => {
                     userId: _id,
                     items: orderItems,
                     paymentMethod: "card"
-                }).then(() => {
+                }).then(async () => {
+                    await User.updateOne({ _id: _id }, {
+                        $inc: {
+                            currentOrder: orderItems.length
+                        }
+                    })
                     Response(res, 200, config.success_message, "Items ordered succuessfully!", null)
                 })
             } else {
@@ -201,7 +213,6 @@ const getProduct = async (req, res) => {
 
         Response(res, 200, config.success_message, null, details)
     } catch (error) {
-        console.log(error);
         Response(res, 400, config.error_message, error?.message ?? error, null)
     }
 }
