@@ -56,7 +56,7 @@ const createOrder = async (req, res) => {
         await Promise.all(
             productData.map(async (item) => {
                 const proudctCheck = await Products.findOne({ _id: item.product });
-                if (proudctCheck.length == 0) {
+                if (proudctCheck?.length == 0) {
                     Response(res, 400, config.error_message, `${item.title} doesn't exist, please remove that`, null)
                 } else {
                     const deliveryDate = new Date(new Date().getTime() + (4 * 24 * 60 * 60 * 1000));
@@ -64,7 +64,7 @@ const createOrder = async (req, res) => {
                 }
             })
         )
-        if (product.length != 0) {
+        if (product?.length != 0) {
             await Order.create({
                 userId: _id,
                 items: productData,
@@ -79,6 +79,7 @@ const createOrder = async (req, res) => {
             })
         }
     } catch (error) {
+        console.log(error)
         Response(res, 400, config.error_message, error?.message ?? error, null)
     }
 }
@@ -89,13 +90,17 @@ const cancelOrder = async (req, res) => {
         const { _id } = req.user;
         const orderDetails = await Order.findOne({ _id: orderId, "items.product": productId });
         let status = "";
-        await Promise.all(
-            orderDetails.items.map((item) => {
-                if (item.product.toString() == productId) {
-                    status = item.status
-                }
-            })
-        )
+        if (orderDetails?.items?.length) {
+            await Promise.all(
+                orderDetails?.items?.map((item) => {
+                    if (item?.product?.toString() == productId) {
+                        status = item.status
+                    }
+                })
+            )
+        } else {
+            Response(res, 400, config.error_message, "Order not available", null)
+        }
         if (status == "delivered") {
             await Order.updateOne({ _id: orderId, userId: _id, "items.product": productId }, {
                 $set: {
@@ -128,23 +133,29 @@ const updateAddress = async (req, res) => {
         const orderDetails = await Order.findOne({ _id: orderId, "items.product": productId });
         let status = "";
 
-        await Promise.all(
-            orderDetails.items.map((item) => {
-                if (item.product.toString() == productId) {
-                    status = item.status
-                }
-            })
-        )
-        if (!(status == "shipped" || status == "delivered")) {
-            await Order.updateOne({ _id: orderId, userId: _id, "items.product": productId }, {
-                $set: {
-                    'items.$.shippingAddress': shippingAddress
-                }
-            }).then(() => {
-                Response(res, 200, config.success_message, "Address updated successfully", null)
-            })
+        if (orderDetails?.items?.length) {
+            await Promise.all(
+                orderDetails.items.map((item) => {
+                    if (item.product.toString() == productId) {
+                        status = item.status
+                    }
+                })
+            )
+            if (!(status == "shipped" || status == "delivered")) {
+                await Order.updateOne({ _id: orderId, userId: _id, "items.product": productId }, {
+                    $set: {
+                        'items.$.shippingAddress': shippingAddress
+                    }
+                }).then(() => {
+                    Response(res, 200, config.success_message, "Address updated successfully", null)
+                })
+            }
+        } else {
+            Response(res, 400, config.error_message, "Order not available", null)
         }
+
     } catch (error) {
+        console.log(error)
         Response(res, 400, config.error_message, error?.message ?? error, null)
     }
 }

@@ -58,7 +58,7 @@ const orderSchema=new mongoose.Schema({
             },
             shippingAddress:{
                 type:mongoose.Schema.Types.ObjectId,
-                required:true,
+                required:false,
                 ref:"address"
             },
             returnProduct:{

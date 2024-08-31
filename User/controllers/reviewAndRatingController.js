@@ -67,7 +67,7 @@ const updateReview=async(req,res)=>{
                 Response(res,200,config.success_message,"Review updated successfully",null)
             })
         }else{
-            flag=fasle;
+            flag=false;
             Response(res,400,config.error_message,"Review doesn't exist",null)
         }
     } catch (error) {

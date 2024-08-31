@@ -25,10 +25,10 @@ const wishlistRouter = require("./User/routes/wishlistRoutes.js");
 //connect mongodb database
 mongoose.connect(process.env.DB_URL).then(() => {
     console.log("Datbase connected !");
-    app.listen(process.env.port || 4000, (err) => {
+    app.listen(process.env.port, function (err) {
         console.log(err);
     });
-    console.log(`Server listening on ${process.env.port || 4000}`);
+    console.log(`Server listening on ${process.env.port}`);
 })
 
 //using middleware for express app
@@ -38,16 +38,16 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 //configure helmet for security
-app.use(helmet({
-    //disable content policy help to prevent XSS attack
-    contentSecurityPolicy: false,
+// app.use(helmet({
+//     //disable content policy help to prevent XSS attack
+//     contentSecurityPolicy: false,
 
-    //prevent MIME type which is not included in content-type header
-    noSniff: true,
-    
-    //prevent information disclousure
-    hidePoweredBy: true
-}))
+//     //prevent MIME type which is not included in content-type header
+//     noSniff: true,
+
+//     //prevent information disclousure
+//     hidePoweredBy: true
+// }))
 
 //app routes
 app.use('/user', userRoutes);
@@ -59,4 +59,4 @@ app.use('/notification', notificationRoutes);
 app.use('/review', reviewRoutes);
 app.use('/stripe', stripeRouter);
 app.use('/webhook', webhookRouter);
-app.use('/wishlist', wishlistRouter);
+app.use('/wishlist', wishlistRouter); 

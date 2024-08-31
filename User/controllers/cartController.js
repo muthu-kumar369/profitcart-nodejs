@@ -161,7 +161,7 @@ const removeProduct = async (req, res) => {
         const { id, productId } = req.body;
         var { amount, actual_amount } = req.body;
         amount = amount.split(',').join("");
-        actual_amount = actual_amount.split(',').join("");
+        actual_amount = actual_amount?.split(',').join("");
 
         const { _id } = req.user;
         const cartDetails = await Cart.findOne({ userId: _id });
@@ -330,6 +330,8 @@ const quantityUpdate = async (req, res) => {
                     Response(res, 200, config.success_message, "Quantity count Updated", null)
                 })
                 break;
+            default:
+                Response(res, 200, config.success_message, "Type not mentioned", null)
         }
     } catch (error) {
         Response(res, 400, config.error_message, error?.message ?? error, null)

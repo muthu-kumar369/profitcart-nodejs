@@ -4,6 +4,7 @@ const { Response } = require("../services/ResponseService");
 const config=require("../config.js");
 
 const userAuth = async (req, res, next) => {
+    console.log("I am in")
     try {
         const token = req.headers["x-access-token"] || req.headers['Authorization'] || req.headers['authorization'];
         if (token) {
@@ -12,6 +13,8 @@ const userAuth = async (req, res, next) => {
                     const userDetails=await User.findOne({email:decode.email});
                     req.user=userDetails;
                     next();
+                } else{
+                    Response(res,400,config.error_message,"Token is not valid",null)
                 }
             })
         }else{
