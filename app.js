@@ -4,7 +4,8 @@ const mongoose = require('mongoose');
 const morgan = require('morgan');
 const dotenv = require("dotenv");
 const cors = require('cors');
-const os = require("os");
+const path = require("path");
+const fs = require("fs");
 const helmet = require("helmet");
 
 //configure the dotenv
@@ -37,17 +38,21 @@ app.use(express.urlencoded());
 app.use(express.json());
 app.use(morgan('dev'));
 
+//create write stream and save the logs using morgan
+const logStream = fs.createWriteStream(path.join(__dirname, "appLogs.log"), { flags: 'a' })
+
+app.use(morgan("combined", { stream: logStream }))
 //configure helmet for security
-// app.use(helmet({
-//     //disable content policy help to prevent XSS attack
-//     contentSecurityPolicy: false,
+app.use(helmet({
+    //disable content policy help to prevent XSS attack
+    contentSecurityPolicy: false,
 
-//     //prevent MIME type which is not included in content-type header
-//     noSniff: true,
+    //prevent MIME type which is not included in content-type header
+    noSniff: true,
 
-//     //prevent information disclousure
-//     hidePoweredBy: true
-// }))
+    //prevent information disclousure
+    hidePoweredBy: true
+}))
 
 //app routes
 app.use('/user', userRoutes);
